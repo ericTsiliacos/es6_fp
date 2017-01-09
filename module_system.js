@@ -11,9 +11,7 @@ const toString = x => x + ""
 const reverse = x => [...x].reverse().join('')
 
 const sequence = (...actions) => () => actions.forEach(action => action())
-const puts = value => () => console.log(value)
-const lift = value => () => value
-const lift2 = f => value => lift(f(value))
+const liftF = f => (...value) => () => f(...value)
 
 const PromiseIO = promise => ({
   then: (...xs) => () => promise.then(result => xs.reduce((accu, curr) => curr(accu)(), result))
@@ -39,20 +37,23 @@ const Result = ({ left, right }) => {
 const mapResult = f => result => result.map(f)
 
 const readFile = () => (
-  PromiseIO(new Promise(resolve => {
+  new Promise(resolve => {
     require('fs').readFile('test.txt', 'utf8', (err, data) => {
        return err
         ? resolve(Result({ left: err }))
         : resolve(Result({ right: data }));
     });
-  }))
+  })
 )
+
+const puts = liftF(console.log)
 
 const main = sequence(
     puts(Pipe("hi").into(concat("world!")))
   , puts(Pipe(5).into(square, toString, reverse, concat("!")))
-  , readFile().then(
-        lift2(mapResult(pipeline(concat("GOT HERE!"), concat("THIS TOO!"))))
+  , puts("1", "2")
+  , PromiseIO(readFile()).then(
+        liftF(mapResult(pipeline(concat("GOT HERE!"), concat("THIS TOO!"))))
       , result => result.right ? puts(result.right) : puts(result.left)
     )
   )
