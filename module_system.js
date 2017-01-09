@@ -3,6 +3,7 @@ const compose = f => g => x => g(f(x))
 const Pipe = x => ({
   into: (...xs) => xs.reduce((accu, curr) => compose(accu)(curr), x => x)(x)
 })
+const pipeline = (...xs) => x => xs.reduce((accu, curr) => compose(accu)(curr), x => x)(x)
 
 const concat = x => y => y + x
 const square = x => x * x
@@ -12,6 +13,7 @@ const reverse = x => [...x].reverse().join('')
 const sequence = (...actions) => () => actions.forEach(action => action())
 const puts = value => () => console.log(value)
 const lift = value => () => value
+const lift2 = f => value => lift(f(value))
 
 const PromiseIO = promise => ({
   then: f => PromiseIO(promise.then(result => f(result)())),
@@ -23,7 +25,7 @@ const Result = ({ left, right }) => {
     {},
     left ?
       {
-        map: () => Result({ left }),
+        map: () => Result({ left })
       }
     :
       {
@@ -34,6 +36,8 @@ const Result = ({ left, right }) => {
       right: () => right
     })
 }
+
+const mapResult = f => result => result.map(f)
 
 const readFile = () => (
   PromiseIO(new Promise(resolve => {
@@ -49,8 +53,7 @@ const main = sequence(
     puts(Pipe("hi").into(concat("world!")))
   , puts(Pipe(5).into(square, toString, reverse, concat("!")))
   , readFile()
-    .then(result => lift(result.map(i => i + "GOT HERE!")))
-    .then(result => lift(result.map(i => i + "\n" + "THIS TWO!")))
+    .then(lift2(mapResult(pipeline(concat("GOT HERE!"), concat("THIS TOO!")))))
     .finally(result => result.right() ? puts(result.right()) : puts(result.left()))
   )
 
