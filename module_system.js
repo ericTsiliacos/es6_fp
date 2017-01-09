@@ -16,8 +16,7 @@ const lift = value => () => value
 const lift2 = f => value => lift(f(value))
 
 const PromiseIO = promise => ({
-  then: f => PromiseIO(promise.then(result => f(result)())),
-  finally: f => () => PromiseIO(promise.then(result => f(result)()))
+  then: (...xs) => () => promise.then(result => xs.reduce((accu, curr) => curr(accu)(), result))
 })
 
 const Result = ({ left, right }) => {
@@ -32,8 +31,8 @@ const Result = ({ left, right }) => {
         map: f => Result({ right: f(right) }),
       },
     {
-      left: () => left,
-      right: () => right
+      left: left,
+      right: right
     })
 }
 
@@ -52,9 +51,10 @@ const readFile = () => (
 const main = sequence(
     puts(Pipe("hi").into(concat("world!")))
   , puts(Pipe(5).into(square, toString, reverse, concat("!")))
-  , readFile()
-    .then(lift2(mapResult(pipeline(concat("GOT HERE!"), concat("THIS TOO!")))))
-    .finally(result => result.right() ? puts(result.right()) : puts(result.left()))
+  , readFile().then(
+        lift2(mapResult(pipeline(concat("GOT HERE!"), concat("THIS TOO!"))))
+      , result => result.right ? puts(result.right) : puts(result.left)
+    )
   )
 
 main();
