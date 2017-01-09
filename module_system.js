@@ -23,11 +23,11 @@ const Result = ({ left, right }) => {
     {},
     left ?
       {
-        map: () => Result({left, right: null}),
+        map: () => Result({ left }),
       }
     :
       {
-        map: f => Result({left: null, right: f(right)}),
+        map: f => Result({ right: f(right) }),
       },
     {
       left: () => left,
@@ -39,8 +39,8 @@ const readFile = () => (
   PromiseIO(new Promise(resolve => {
     require('fs').readFile('test.txt', 'utf8', (err, data) => {
        return err
-        ? resolve(Result({ left: err, right: null }))
-        : resolve(Result({ left: null, right: data }));
+        ? resolve(Result({ left: err }))
+        : resolve(Result({ right: data }));
     });
   }))
 )
