@@ -66,19 +66,19 @@ const fetchIO = url => () => fetch(url)
 
 const puts = liftF(console.log)
 
-const PromiseIO = {
+const AsyncIO = {
   chaining: thunk => ({
-    then: f => PromiseIO.chaining(() => thunk().then(value => f(value)())),
-    then_: f => PromiseIO.chaining(() => thunk().then(() => liftF(f)()())),
+    then: f => AsyncIO.chaining(() => thunk().then(value => f(value)())),
+    then_: f => AsyncIO.chaining(() => thunk().then(() => liftF(f)()())),
     run: thunk
   }),
-  of: thunk => PromiseIO.chaining(thunk),
-  do: () => PromiseIO.chaining(() => Promise.resolve())
+  of: thunk => AsyncIO.chaining(thunk),
+  do: () => AsyncIO.chaining(() => Promise.resolve())
 }
 
 const main2 = puts(pipeline(square, toString, reverse, concat('!'))(2))
 
-const main1 = PromiseIO.of(fetchIO('https://www.reddit.com/top/.json'))
+const main1 = AsyncIO.of(fetchIO('https://www.reddit.com/top/.json'))
                       .then(liftF(prop('right')))
                       .then(puts)
                       .then_(puts('ALL DONE!'))
