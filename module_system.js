@@ -11,11 +11,8 @@ const toString = x => x + ""
 const reverse = x => [...x].reverse().join('')
 
 const sequence = (...actions) => () => actions.forEach(action => action())
+const lift = value => () => value
 const liftF = f => (...value) => () => f(...value)
-
-const PromiseIO = promise => ({
-  then: (...xs) => () => promise.then(result => xs.reduce((accu, curr) => curr(accu)(), result))
-})
 
 const Result = ({ left, right }) => {
   return Object.assign(
@@ -37,7 +34,7 @@ const Result = ({ left, right }) => {
 const mapResult = f => result => result.map(f)
 
 const readFile = () => (
-  new Promise(resolve => {
+  () => new Promise(resolve => {
     require('fs').readFile('test.txt', 'utf8', (err, data) => {
        return err
         ? resolve(Result({ left: err }))
@@ -46,16 +43,35 @@ const readFile = () => (
   })
 )
 
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+const fetchIO = url => PromiseIO.of(() => fetch(url)
+    .then(response => {
+        if (response.status >= 400) {
+            throw new Error("Bad response from server");
+        }
+        return response.json();
+    })
+      .then(value => Result({ right: value }))
+      .catch(err => Result({ left: err })));
+
 const puts = liftF(console.log)
 
-const main = sequence(
-    puts(Pipe("hi").into(concat("world!")))
-  , puts(Pipe(5).into(square, toString, reverse, concat("!")))
-  , puts("1", "2")
-  , PromiseIO(readFile()).then(
-        liftF(mapResult(pipeline(concat("GOT HERE!"), concat("THIS TOO!"))))
-      , result => result.right ? puts(result.right) : puts(result.left)
-    )
-  )
+const PromiseIO = {
+  chaining: thunk => ({
+    then: f => PromiseIO.chaining(() => thunk().then(value => f(value)())),
+    run: thunk
+  }),
+  of: value => PromiseIO.chaining(value)
+}
 
-main();
+const main = fetchIO('https://www.reddit.com/top/.json')
+               .then(result => puts(result.right))
+               .then(() => puts("ALL DONE!"))
+               .then(() => readFile())
+               .then(result => puts(result.right))
+               .then(() => lift(5))
+               .then(liftF(pipeline(square, toString, reverse, concat("!"))))
+               .then(value => puts(value))
+
+main.run()
