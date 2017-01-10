@@ -60,6 +60,7 @@ const puts = liftF(console.log)
 const PromiseIO = {
   chaining: thunk => ({
     then: f => PromiseIO.chaining(() => thunk().then(value => f(value)())),
+    then_: f => PromiseIO.chaining(() => thunk().then(value => liftF(f)(value)())),
     run: thunk
   }),
   of: value => PromiseIO.chaining(value)
@@ -67,11 +68,11 @@ const PromiseIO = {
 
 const main = fetchIO('https://www.reddit.com/top/.json')
                .then(result => puts(result.right))
-               .then(() => puts("ALL DONE!"))
-               .then(() => readFile())
+               .then_(puts("ALL DONE!"))
+               .then_(readFile())
                .then(result => puts(result.right))
-               .then(() => lift(5))
-               .then(liftF(pipeline(square, toString, reverse, concat("!"))))
-               .then(value => puts(value))
+               .then_(lift(5))
+               .then_(pipeline(square, toString, reverse, concat("!")))
+               .then(puts)
 
 main.run()
