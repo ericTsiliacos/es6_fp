@@ -45,7 +45,7 @@ const readFile = () => (
 
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
-const fetchIO = url => PromiseIO.of(() => fetch(url)
+const fetchIO = url => () => fetch(url)
     .then(response => {
         if (response.status >= 400) {
             throw new Error("Bad response from server");
@@ -53,7 +53,7 @@ const fetchIO = url => PromiseIO.of(() => fetch(url)
         return response.json();
     })
       .then(value => Result({ right: value }))
-      .catch(err => Result({ left: err })));
+      .catch(err => Result({ left: err }))
 
 const puts = liftF(console.log)
 
@@ -66,13 +66,13 @@ const PromiseIO = {
   of: value => PromiseIO.chaining(value)
 }
 
-const main = fetchIO('https://www.reddit.com/top/.json')
-               .then(result => puts(result.right))
-               .then_(puts("ALL DONE!"))
-               .then_(readFile())
-               .then(result => puts(result.right))
-               .then_(lift(5))
-               .then_(pipeline(square, toString, reverse, concat("!")))
-               .then(puts)
+const main = PromiseIO.of(fetchIO('https://www.reddit.com/top/.json'))
+                      .then(result => puts(result.right))
+                      .then_(puts("ALL DONE!"))
+                      .then_(readFile())
+                      .then(result => puts(result.right))
+                      .then_(lift(5))
+                      .then_(pipeline(square, toString, reverse, concat("!")))
+                      .then(puts)
 
 main.run()
