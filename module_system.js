@@ -5,6 +5,8 @@ const Pipe = x => ({
 })
 const pipeline = (...xs) => x => xs.reduce((accu, curr) => compose(accu)(curr), x => x)(x)
 
+const prop = p => x => x[p]
+
 const concat = x => y => y + x
 const square = x => x * x
 const toString = x => x + ""
@@ -33,15 +35,13 @@ const Result = ({ left, right }) => {
 
 const mapResult = f => result => result.map(f)
 
-const readFile = () => (
-  () => new Promise(resolve => {
-    require('fs').readFile('test.txt', 'utf8', (err, data) => {
-       return err
-        ? resolve(Result({ left: err }))
-        : resolve(Result({ right: data }));
-    });
-  })
-)
+const readFile = (filename) => () => new Promise(resolve => {
+  require('fs').readFile(filename, 'utf8', (err, data) => {
+     return err
+      ? resolve(Result({ left: err }))
+      : resolve(Result({ right: data }));
+  });
+})
 
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
@@ -67,12 +67,13 @@ const PromiseIO = {
 }
 
 const main = PromiseIO.of(fetchIO('https://www.reddit.com/top/.json'))
-                      .then(result => puts(result.right))
-                      .then_(puts("ALL DONE!"))
-                      .then_(readFile())
-                      .then(result => puts(result.right))
+                      .then(liftF(prop('right')))
+                      .then(puts)
+                      .then_(puts('ALL DONE!'))
+                      .then_(readFile('test.txt'))
+                      .then(liftF(prop('right')))
                       .then_(lift(5))
-                      .then_(pipeline(square, toString, reverse, concat("!")))
+                      .then_(pipeline(square, toString, reverse, concat('!')))
                       .then(puts)
 
 main.run()
