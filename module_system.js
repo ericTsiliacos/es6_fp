@@ -22,7 +22,6 @@ const square = x => x * x
 const toString = x => x + ""
 const reverse = x => [...x].reverse().join('')
 
-const sequence = (...actions) => () => actions.forEach(action => action())
 const lift = value => () => value
 const liftF = f => (...value) => () => f(...value)
 
