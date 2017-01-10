@@ -72,8 +72,7 @@ const AsyncIO = {
     then_: f => AsyncIO.chaining(() => thunk().then(() => liftF(f)()())),
     run: thunk
   }),
-  of: thunk => AsyncIO.chaining(thunk),
-  do: () => AsyncIO.chaining(() => Promise.resolve())
+  of: thunk => AsyncIO.chaining(thunk)
 }
 
 const main2 = puts(pipeline(square, toString, reverse, concat('!'))(2))
