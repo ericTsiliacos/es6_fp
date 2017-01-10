@@ -21,6 +21,7 @@ const Wrapper = ({ apiClient, service }) => ({
 const AbstractBehavior = ({ wrapper, renderer }) => ({
   execute: () => {
     wrapper.doStuff().then(data => {
+      renderer.render("Printing name twice:");
       renderer.render(data);
       renderer.render(data);
       renderer.render("Finished");
@@ -38,8 +39,7 @@ const main1 = () => {
   abstractBehavior.execute();
 };
 
-main1();
-
+// main1();
 const Result = ({ left, right }) => {
   return Object.assign(
     {},
@@ -88,7 +88,11 @@ const AsyncIO = {
 const main2 = ({ fetch, puts }) => AsyncIO
   .of(fetch("http://uinames.com/api/"))
   .then(liftF(mapResult(props("people", 1))))
-  .sequence(pipe(props("right"), puts), pipe(props("right"), puts))
+  .sequence(
+    () => puts("Printing name twice:"),
+    pipe(props("right"), puts),
+    pipe(props("right"), puts)
+  )
   .sequence_(puts("Finished"));
 
 main2({ fetch: fetchIO, puts }).run();
