@@ -63,10 +63,11 @@ const PromiseIO = {
     then_: f => PromiseIO.chaining(() => thunk().then(value => liftF(f)(value)())),
     run: thunk
   }),
-  of: value => PromiseIO.chaining(value)
+  of: thunk => PromiseIO.chaining(thunk),
+  do: () => PromiseIO.chaining(() => Promise.resolve())
 }
 
-const main = PromiseIO.of(fetchIO('https://www.reddit.com/top/.json'))
+const main1 = PromiseIO.of(fetchIO('https://www.reddit.com/top/.json'))
                       .then(liftF(prop('right')))
                       .then(puts)
                       .then_(puts('ALL DONE!'))
@@ -76,4 +77,11 @@ const main = PromiseIO.of(fetchIO('https://www.reddit.com/top/.json'))
                       .then(liftF(pipeline(square, toString, reverse, concat('!'))))
                       .then(puts)
 
-main.run()
+const main2 = PromiseIO.do()
+                      .then_(lift(2))
+                      .then(liftF(pipeline(square, toString, reverse, concat('!'))))
+                      .then(puts)
+
+main1.run()
+
+main2.run()
