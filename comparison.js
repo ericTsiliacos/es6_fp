@@ -23,6 +23,7 @@ const AbstractBehavior = ({ wrapper, renderer }) => ({
     wrapper.doStuff().then(data => {
       renderer.render(data);
       renderer.render(data);
+      renderer.render("Finished");
     });
   }
 });
@@ -76,6 +77,9 @@ const AsyncIO = {
     sequence: (...fs) => AsyncIO.chaining(
       () => thunk().then(value => fs.forEach(f => f(value)()))
     ),
+    sequence_: (...fs) => AsyncIO.chaining(
+      () => thunk().then(() => fs.forEach(f => liftF(f)()()))
+    ),
     run: thunk
   }),
   of: thunk => AsyncIO.chaining(thunk)
@@ -84,6 +88,7 @@ const AsyncIO = {
 const main2 = ({ fetch, puts }) => AsyncIO
   .of(fetch("http://uinames.com/api/"))
   .then(liftF(mapResult(props("people", 1))))
-  .sequence(pipe(props("right"), puts), pipe(props("right"), puts));
+  .sequence(pipe(props("right"), puts), pipe(props("right"), puts))
+  .sequence_(puts("Finished"));
 
 main2({ fetch: fetchIO, puts }).run();
