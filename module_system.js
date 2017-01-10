@@ -73,7 +73,7 @@ const main = PromiseIO.of(fetchIO('https://www.reddit.com/top/.json'))
                       .then_(readFile('test.txt'))
                       .then(liftF(prop('right')))
                       .then_(lift(5))
-                      .then_(pipeline(square, toString, reverse, concat('!')))
+                      .then(liftF(pipeline(square, toString, reverse, concat('!'))))
                       .then(puts)
 
 main.run()
