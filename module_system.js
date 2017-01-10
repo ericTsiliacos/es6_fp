@@ -75,6 +75,20 @@ const AsyncIO = {
   of: thunk => AsyncIO.chaining(thunk)
 }
 
+const typedCheckAddition = x => y => f => {
+  if (typeof x !== 'number' || typeof y !== 'number') {
+    throw new Error("Bad type")
+  } else {
+    return f
+  }
+}
+const typedAdd = x => y => () => typedCheckAddition(x)(y)(() => x + y)
+const compileAdd = typedAdd(1)(1)
+const executeAdd = compileAdd()
+const value = executeAdd()
+
+console.log(value)
+
 const main2 = puts(pipeline(square, toString, reverse, concat('!'))(2))
 
 const main1 = AsyncIO.of(fetchIO('https://www.reddit.com/top/.json'))
