@@ -40,50 +40,26 @@ const main1 = () => {
 };
 
 // main1();
-const Result = ({ left, right }) => {
-  return Object.assign(
-    {},
-    left
-      ? { map: () => Result({ left }) }
-      : { map: f => Result({ right: f(right) }) },
-    { left: left, right: right }
-  );
-};
-const mapResult = f => result => result.map(f);
+const {
+  AsyncIO,
+  puts,
+  pipe,
+  compose,
+  props,
+  liftF,
+  mapResult,
+  Result
+} = require("./async_io");
+
 const fetchIO = url => () => fetch(url)
   .then(response => {
     if (response.status >= 400) {
       throw new Error("Bad response from server");
     }
-    return response.json();
+    return { people: [ "Corban", "Eric" ] };
   })
-  .then(value => Result({ right: { people: [ "Corban", "Eric" ] } }))
+  .then(value => Result({ right: value }))
   .catch(err => Result({ left: err }));
-const liftF = f => (...value) => () => f(...value);
-const puts = liftF(console.log);
-const props = (...properties) => x => properties.reduce(
-  (accu, curr) => accu[curr],
-  x
-);
-const compose = f => g => x => g(f(x));
-const pipe = (...xs) => x => xs.reduce(
-  (accu, curr) => compose(accu)(curr),
-  x => x
-)(x);
-const AsyncIO = {
-  chaining: thunk => ({
-    then: f => AsyncIO.chaining(() => thunk().then(value => f(value)())),
-    then_: f => AsyncIO.chaining(() => thunk().then(() => liftF(f)()())),
-    sequence: (...fs) => AsyncIO.chaining(
-      () => thunk().then(value => fs.forEach(f => f(value)()))
-    ),
-    sequence_: (...fs) => AsyncIO.chaining(
-      () => thunk().then(() => fs.forEach(f => liftF(f)()()))
-    ),
-    run: thunk
-  }),
-  of: thunk => AsyncIO.chaining(thunk)
-};
 
 const main2 = ({ fetch, puts }) => AsyncIO
   .of(fetch("http://uinames.com/api/"))
