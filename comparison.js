@@ -1,14 +1,14 @@
 require("es6-promise").polyfill();
 require("isomorphic-fetch");
 
-const ApiClient = () => ({
-  getPeople: () => fetch("http://uinames.com/api/").then(response => {
-    if (response.status >= 400) {
-      throw new Error("Bad response from server");
-    }
-    return { people: [ "Corban", "Eric" ] };
-  })
+const getUrl = url => fetch(url).then(response => {
+  if (response.status >= 400) {
+    throw new Error("Bad response from server");
+  }
+  return { people: [ "Corban", "Eric" ] };
 });
+
+const ApiClient = url => ({ getPeople: () => getUrl(url) });
 
 const Renderer = () => ({ render: console.log });
 
@@ -30,7 +30,7 @@ const AbstractBehavior = ({ wrapper, renderer }) => ({
 });
 
 const main1 = () => {
-  const apiClient = ApiClient();
+  const apiClient = ApiClient("http://uinames.com/api/");
   const renderer = Renderer();
   const service = Service(renderer);
   const wrapper = Wrapper({ apiClient, service });
@@ -40,24 +40,10 @@ const main1 = () => {
 };
 
 // main1();
-const {
-  AsyncIO,
-  puts,
-  pipe,
-  compose,
-  props,
-  liftF,
-  mapResult,
-  Result
-} = require("./async_io");
+const { AsyncIO, puts, pipe, compose, props, liftF } = require("./async_io");
+const { mapResult, Result } = require("./result");
 
-const fetchIO = url => () => fetch(url)
-  .then(response => {
-    if (response.status >= 400) {
-      throw new Error("Bad response from server");
-    }
-    return { people: [ "Corban", "Eric" ] };
-  })
+const fetchIO = url => () => getUrl(url)
   .then(value => Result({ right: value }))
   .catch(err => Result({ left: err }));
 

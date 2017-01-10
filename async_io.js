@@ -14,18 +14,6 @@ const props = (...properties) => x => properties.reduce(
 
 const puts = liftF(console.log);
 
-const Result = ({ left, right }) => {
-  return Object.assign(
-    {},
-    left
-      ? { map: () => Result({ left }) }
-      : { map: f => Result({ right: f(right) }) },
-    { left: left, right: right }
-  );
-};
-
-const mapResult = f => result => result.map(f);
-
 const AsyncIO = {
   chaining: thunk => ({
     then: f => AsyncIO.chaining(() => thunk().then(value => f(value)())),
@@ -41,13 +29,4 @@ const AsyncIO = {
   of: thunk => AsyncIO.chaining(thunk)
 };
 
-module.exports = {
-  AsyncIO,
-  liftF,
-  compose,
-  pipe,
-  props,
-  puts,
-  Result,
-  mapResult
-};
+module.exports = { AsyncIO, liftF, compose, pipe, props, puts };
