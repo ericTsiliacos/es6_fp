@@ -1,0 +1,23 @@
+{
+  "name": "es6_fun",
+  "version": "1.0.0",
+  "description": "",
+  "main": "module_system.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ericTsiliacos/es6_fp.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ericTsiliacos/es6_fp/issues"
+  },
+  "homepage": "https://github.com/ericTsiliacos/es6_fp#readme",
+  "dependencies": {
+    "es6-promise": "^4.0.5",
+    "isomorphic-fetch": "^2.2.1"
+  }
+}
