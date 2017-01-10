@@ -1,3 +1,13 @@
+const run = x => {
+  if (typeof x === 'function') {
+    x()
+  } else if (x.run !== undefined) {
+    x.run()
+  } else {
+    x
+  }
+}
+
 const compose = f => g => x => g(f(x))
 
 const Pipe = x => ({
@@ -67,6 +77,8 @@ const PromiseIO = {
   do: () => PromiseIO.chaining(() => Promise.resolve())
 }
 
+const main2 = puts(pipeline(square, toString, reverse, concat('!'))(2))
+
 const main1 = PromiseIO.of(fetchIO('https://www.reddit.com/top/.json'))
                       .then(liftF(prop('right')))
                       .then(puts)
@@ -77,11 +89,5 @@ const main1 = PromiseIO.of(fetchIO('https://www.reddit.com/top/.json'))
                       .then(liftF(pipeline(square, toString, reverse, concat('!'))))
                       .then(puts)
 
-const main2 = PromiseIO.do()
-                      .then_(lift(2))
-                      .then(liftF(pipeline(square, toString, reverse, concat('!'))))
-                      .then(puts)
-
-main1.run()
-
-main2.run()
+run(main2)
+run(main1)
