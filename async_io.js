@@ -1,3 +1,5 @@
+const { Result } = require("./result");
+
 const liftF = f => (...value) => () => f(...value);
 
 const compose = f => g => x => g(f(x));
@@ -13,6 +15,10 @@ const props = (...properties) => x => properties.reduce(
 );
 
 const puts = liftF(console.log);
+
+const liftPromise = f => () => f()
+  .then(value => Result({ right: value }))
+  .catch(err => Result({ left: err }));
 
 const AsyncIO = {
   chaining: thunk => ({
@@ -31,7 +37,8 @@ const AsyncIO = {
     ),
     run: thunk
   }),
-  of: thunk => AsyncIO.chaining(thunk)
+  of: thunk => AsyncIO.chaining(thunk),
+  from: thunk => value => AsyncIO.chaining(liftPromise(liftF(thunk)(value)))
 };
 
 module.exports = { AsyncIO, liftF, compose, pipe, props, puts };
