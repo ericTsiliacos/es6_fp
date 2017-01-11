@@ -1,9 +1,9 @@
-const { Http } = require("./http");
-
-const ApiClient = url => ({ fetchPeople: () => Http.get(url) });
+const Database = () => ({
+  connect: () => ({ query: () => Promise.resolve({ people: [ "Eric" ] }) })
+});
 const Renderer = () => ({ render: console.log });
-const PeopleRepository = apiClient => ({
-  getPeople: () => apiClient.fetchPeople()
+const PeopleRepository = databaseConnection => ({
+  getPeople: () => databaseConnection.query()
 });
 const UseCase = ({ peopleRepository, renderer }) => ({
   execute: () => {
@@ -20,8 +20,8 @@ const UseCase = ({ peopleRepository, renderer }) => ({
 });
 
 const main = () => {
-  const apiClient = ApiClient("http://uinames.com/api/");
-  const peopleRepository = PeopleRepository(apiClient);
+  const databaseConnection = Database().connect();
+  const peopleRepository = PeopleRepository(databaseConnection);
   const renderer = Renderer();
   const useCase = UseCase({ peopleRepository, renderer });
 
