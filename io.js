@@ -3,7 +3,7 @@ const IO = {
     run: f,
     then: thunk => IO.chaining((...values) => {
       const value = f(values);
-      thunk(value).run();
+      return thunk(value).run();
     })
   }),
   of: f => (...values) => IO.chaining(() => f(...values)),
