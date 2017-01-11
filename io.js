@@ -8,6 +8,7 @@ const IO = {
   }),
   of: f => (...values) => IO.chaining(() => f(...values)),
   lift: value => IO.of(() => value)(),
+  unit: () => IO.of(() => {})(),
   sequence: (...actions) => IO.chaining(() => actions.forEach(a => a.run()))
 };
 

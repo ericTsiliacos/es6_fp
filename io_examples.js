@@ -19,5 +19,5 @@ performAsyncIO().then(p => {
   p.then(result => {
     console.log(result.right);
   });
-  return print("inside");
+  return IO.unit();
 }).run();
