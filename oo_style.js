@@ -20,7 +20,7 @@ const AbstractBehavior = ({ wrapper, renderer }) => ({
 const main = () => {
   const apiClient = ApiClient("http://uinames.com/api/");
   const renderer = Renderer();
-  const service = Service(renderer);
+  const service = Service();
   const wrapper = Wrapper({ apiClient, service });
   const abstractBehavior = AbstractBehavior({ wrapper, renderer });
 

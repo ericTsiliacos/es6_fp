@@ -5,7 +5,7 @@ const get = url => fetch(url).then(response => {
   if (response.status >= 400) {
     throw new Error("Bad response from server");
   }
-  return { people: [ "Corban", "Eric" ] };
+  return { people: [ "Corban", "Eric", "Annie" ] };
 });
 
 const Http = { get };
