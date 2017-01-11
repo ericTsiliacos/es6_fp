@@ -1,30 +1,31 @@
 const { Http } = require("./http");
 
-const ApiClient = url => ({ getPeople: () => Http.get(url) });
+const ApiClient = url => ({ fetchPeople: () => Http.get(url) });
 const Renderer = () => ({ render: console.log });
-const Service = () => ({ transformData: json => json.people[0] });
-const Wrapper = ({ apiClient, service }) => ({
-  doStuff: () => apiClient.getPeople().then(service.transformData)
+const PeopleRepository = apiClient => ({
+  getPeople: () => apiClient.fetchPeople()
 });
-const AbstractBehavior = ({ wrapper, renderer }) => ({
+const UseCase = ({ peopleRepository, renderer }) => ({
   execute: () => {
-    wrapper.doStuff().then(data => {
-      renderer.render("Printing name twice:");
-      renderer.render(data);
-      renderer.render(data);
-      renderer.render("Finished");
-    });
+    peopleRepository
+      .getPeople()
+      .then(json => json.people[0])
+      .then(data => {
+        renderer.render("Printing name twice:");
+        renderer.render(data);
+        renderer.render(data);
+        renderer.render("Finished");
+      });
   }
 });
 
 const main = () => {
   const apiClient = ApiClient("http://uinames.com/api/");
+  const peopleRepository = PeopleRepository(apiClient);
   const renderer = Renderer();
-  const service = Service();
-  const wrapper = Wrapper({ apiClient, service });
-  const abstractBehavior = AbstractBehavior({ wrapper, renderer });
+  const useCase = UseCase({ peopleRepository, renderer });
 
-  abstractBehavior.execute();
+  useCase.execute();
 };
 
 main();

@@ -2,15 +2,17 @@ const { Http } = require("./http");
 const { AsyncIO, puts, pipe, compose, props, liftF } = require("./async_io");
 const { mapResult } = require("./result");
 
-const fetchAndPrintNames = ({ fetchAsyncIO, puts }) => fetchAsyncIO
-  .then(liftF(mapResult(props("people", 1))))
-  ._thread_(puts("Printing name twice:"))
-  .sequence(pipe(props("right"), puts), pipe(props("right"), puts))
-  ._sequence(puts("Finished"));
+const fetchAndPrintNamesAsyncIO = ({ httpGet, puts }) => {
+  return AsyncIO.from(httpGet)("http://uinames.com/api/")
+    .then(liftF(mapResult(props("people", 1))))
+    .sequence(
+      () => puts("Printing name twice:"),
+      pipe(props("right"), puts),
+      pipe(props("right"), puts),
+      () => puts("Finished")
+    );
+};
 
-const main = fetchAndPrintNames({
-  fetchAsyncIO: AsyncIO.from(Http.get)("http://uinames.com/api/"),
-  puts
-});
+const main = fetchAndPrintNamesAsyncIO({ httpGet: Http.get, puts });
 
 main.run();
