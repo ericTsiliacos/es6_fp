@@ -10,11 +10,8 @@ const fetchIO = url => () => Http
 const main = ({ fetch, puts }) => AsyncIO
   .of(fetch("http://uinames.com/api/"))
   .then(liftF(mapResult(props("people", 1))))
-  .sequence(
-    () => puts("Printing name twice:"),
-    pipe(props("right"), puts),
-    pipe(props("right"), puts)
-  )
-  .sequence_(puts("Finished"));
+  ._thread_(puts("Printing name twice:"))
+  .sequence(pipe(props("right"), puts), pipe(props("right"), puts))
+  ._sequence(puts("Finished"));
 
 main({ fetch: fetchIO, puts }).run();

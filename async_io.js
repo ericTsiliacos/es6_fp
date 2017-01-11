@@ -17,12 +17,17 @@ const puts = liftF(console.log);
 const AsyncIO = {
   chaining: thunk => ({
     then: f => AsyncIO.chaining(() => thunk().then(value => f(value)())),
-    then_: f => AsyncIO.chaining(() => thunk().then(() => liftF(f)()())),
     sequence: (...fs) => AsyncIO.chaining(
       () => thunk().then(value => fs.forEach(f => f(value)()))
     ),
-    sequence_: (...fs) => AsyncIO.chaining(
-      () => thunk().then(() => fs.forEach(f => liftF(f)()()))
+    _sequence: (...fs) => AsyncIO.chaining(
+      () => thunk().then(() => fs.forEach(f => f()))
+    ),
+    _thread_: f => AsyncIO.chaining(
+      () => thunk().then(value => {
+        f();
+        return value;
+      })
     ),
     run: thunk
   }),
