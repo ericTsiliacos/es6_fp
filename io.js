@@ -6,7 +6,8 @@ const IO = {
       thunk(value).run();
     })
   }),
-  of: f => (...values) => IO.chaining(() => f(...values))
+  of: f => (...values) => IO.chaining(() => f(...values)),
+  sequence: (...actions) => IO.chaining(() => actions.forEach(a => a.run()))
 };
 
 module.exports = { IO };
