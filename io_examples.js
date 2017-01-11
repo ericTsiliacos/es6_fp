@@ -21,3 +21,7 @@ performAsyncIO().then(p => {
   });
   return IO.unit();
 }).run();
+
+const concat = x => y => y + x;
+
+getLine().map(concat("!!!!")).map(concat("...")).then(print).run();
