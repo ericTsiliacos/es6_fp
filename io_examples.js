@@ -26,10 +26,11 @@ main({ print }).run();
 const performAsyncIO = IO.of(() => Promise.resolve(Result({ right: 1 })));
 
 performAsyncIO().then(p => {
-  p.then(result => {
-    console.log(result.right);
-  });
-  return IO.unit();
+  return IO.lift(
+    p.then(result => {
+      console.log(result.right);
+    })
+  );
 }).run();
 
 const concat = x => y => y + x;
